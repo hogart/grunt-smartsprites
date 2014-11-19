@@ -8,13 +8,13 @@ module.exports = function(grunt) {
     var f = require('util').format;
     var log = grunt.log;
     var verbose = grunt.verbose;
-    var _s = require('underscore.string');
+    var camelize = require('underscore.string').camelize;
 
     var isWin = /^win/.test(process.platform);
     var binPath = path.join(
         __dirname,
         '..',
-        'smartsprites-0.2.9/smartsprites.' + (isWin ? 'cmd' : 'sh')
+        'smartsprites-0.2.10/smartsprites.' + (isWin ? 'cmd' : 'sh')
     );
 
     var availableOptions = [
@@ -40,17 +40,19 @@ module.exports = function(grunt) {
         // Provide arguments
         var args = [];
         availableOptions.forEach(function (opt) {
-            var camelized = _s.camelize(opt);
+            var camelized = camelize(opt);
 
             if (data[camelized]) {
-                args.push('--' + opt + ' ' + data[camelized] + '');
+                args.push('--' + opt + ' ' + data[camelized]);
             }
         });
 
         var done = this.async();
-        var child = cp.execFile(data.smartspritePath, args);
 
-        verbose.writeln(f('Execute %s %s', data.smartspritePath, args.join(' ')));
+        var cmd = data.smartspritePath + ' ' + args.join(' ');
+        verbose.writeln(f('Execute %s', cmd));
+
+        var child = cp.exec(cmd);
 
         // Pipe std if needed
         if (data.stdout) {
@@ -70,6 +72,4 @@ module.exports = function(grunt) {
             done();
         });
     });
-
-
 };
